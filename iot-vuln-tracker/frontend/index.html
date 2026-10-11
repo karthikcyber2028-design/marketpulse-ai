@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Vulnerability Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>IoT Vuln Tracker</h1>
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="showSection('dashboard')" class="active" data-section="dashboard">Dashboard</a>
+            <a href="#" onclick="showSection('vulnerabilities')" data-section="vulnerabilities">Vulnerabilities</a>
+            <a href="#" onclick="showSection('manufacturers')" data-section="manufacturers">Manufacturers</a>
+            <a href="#" onclick="showSection('alerts')" data-section="alerts">Alerts</a>
+            <a href="#" onclick="showSection('integrations')" data-section="integrations">Integrations</a>
+        </div>
+    </nav>
+
+    <!-- Dashboard Section -->
+    <div id="section-dashboard" class="section active">
+        <div class="section-header">
+            <h2>Security Dashboard</h2>
+            <div class="actions">
+                <button onclick="triggerSync('nvd')" class="btn btn-primary">Sync NVD</button>
+                <button onclick="triggerSync('ics-cert')" class="btn btn-secondary">Sync ICS-CERT</button>
+                <button onclick="refreshDashboard()" class="btn btn-outline">Refresh</button>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">-</div>
+                <div class="stat-label">Total Vulnerabilities</div>
+            </div>
+            <div class="stat-card critical">
+                <div class="stat-value" id="stat-critical">-</div>
+                <div class="stat-label">Critical</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-value" id="stat-high">-</div>
+                <div class="stat-label">High</div>
+            </div>
+            <div class="stat-card medium">
+                <div class="stat-value" id="stat-medium">-</div>
+                <div class="stat-label">Medium</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-active-alerts">-</div>
+                <div class="stat-label">Active Alerts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-manufacturers">-</div>
+                <div class="stat-label">Manufacturers Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-devices">-</div>
+                <div class="stat-label">Devices Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-exploited">-</div>
+                <div class="stat-label">Actively Exploited</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Vulnerability Trends</h3>
+                <canvas id="trend-chart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Risk Distribution</h3>
+                <canvas id="risk-chart"></canvas>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <h3>Manufacturer Security Rankings</h3>
+            <table id="rankings-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Manufacturer</th>
+                        <th>Posture Score</th>
+                        <th>Total Vulns</th>
+                        <th>Critical</th>
+                        <th>Avg Time to Patch</th>
+                        <th>Rating</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="table-card">
+            <h3>Compliance Framework Mapping</h3>
+            <div id="compliance-mapping"></div>
+        </div>
+    </div>
+
+    <!-- Vulnerabilities Section -->
+    <div id="section-vulnerabilities" class="section">
+        <div class="section-header">
+            <h2>Vulnerabilities</h2>
+            <div class="filters">
+                <select id="vuln-severity-filter" onchange="loadVulnerabilities()">
+                    <option value="">All Severities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <select id="vuln-status-filter" onchange="loadVulnerabilities()">
+                    <option value="">All Statuses</option>
+                    <option value="analyzing">Analyzing</option>
+                    <option value="unpatched">Unpatched</option>
+                    <option value="patched">Patched</option>
+                    <option value="disputed">Disputed</option>
+                    <option value="retracted">Retracted</option>
+                </select>
+                <input type="text" id="vuln-search" placeholder="Search CVE, product..." onkeyup="debounceSearch()">
+            </div>
+        </div>
+
+        <div class="table-card">
+            <table id="vuln-table">
+                <thead>
+                    <tr>
+                        <th>CVE ID</th>
+                        <th>Description</th>
+                        <th>Severity</th>
+                        <th>Risk Score</th>
+                        <th>CVSS</th>
+                        <th>Status</th>
+                        <th>Exploit</th>
+                        <th>Published</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="pagination" id="vuln-pagination"></div>
+        </div>
+    </div>
+
+    <!-- Manufacturers Section -->
+    <div id="section-manufacturers" class="section">
+        <div class="section-header">
+            <h2>Manufacturer Profiles</h2>
+            <div class="actions">
+                <button onclick="showAddManufacturer()" class="btn btn-primary">Add Manufacturer</button>
+                <button onclick="rescoreManufacturers()" class="btn btn-secondary">Recalculate Scores</button>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <table id="mfg-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Posture Score</th>
+                        <th>Total Vulns</th>
+                        <th>Critical</th>
+                        <th>Active</th>
+                        <th>Avg Time to Patch</th>
+                        <th>Patch Rate</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Alerts Section -->
+    <div id="section-alerts" class="section">
+        <div class="section-header">
+            <h2>Alerts & Notifications</h2>
+            <div class="actions">
+                <button onclick="showSection('alert-rules')" class="btn btn-outline">Manage Rules</button>
+            </div>
+        </div>
+
+        <div class="alert-summary" id="alert-summary"></div>
+
+        <div class="table-card">
+            <table id="alert-table">
+                <thead>
+                    <tr>
+                        <th>Severity</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Assigned To</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Integrations Section -->
+    <div id="section-integrations" class="section">
+        <div class="section-header">
+            <h2>Integrations</h2>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('webhooks')">Webhooks</button>
+            <button class="tab" onclick="showTab('siem')">SIEM</button>
+            <button class="tab" onclick="showTab('ticketing')">Ticketing</button>
+            <button class="tab" onclick="showTab('asset-mgmt')">Asset Management</button>
+            <button class="tab" onclick="showTab('data-sources')">Data Sources</button>
+        </div>
+
+        <div class="table-card" id="integrations-content"></div>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()" style="display:none">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button onclick="closeModal()" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

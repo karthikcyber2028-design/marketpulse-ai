@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}FreeBeats - Home{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Featured Songs -->
+        <div class="card rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-text-secondary mb-4">Popular Songs</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for song in songs %}
+                <div class="hover-card rounded-lg p-4 flex flex-col justify-between flex-1">
+                    <img src="{{ song.cover_url if song.cover_url else '/static/images/default-cover.png' }}" 
+                         alt="{{ song.title }}" 
+                         class="w-full h-32 object-cover rounded-md mb-3">
+                    <h3 class="text-capitalize text-sm font-medium line-clamp-1">{{ song.title }}</h3>
+                    <p class="text-text-secondary text-xs line-clamp-1">{{ song.artist.name if song.artist else 'Unknown Artist' }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="badge badge-secondary">{{ song.language or 'Unknown' }}</span>
+                        <span class="badge badge-primary">{{ song.genre or 'Unknown' }}</span>
+                    </div>
+                    <button class="mt-auto btn-primary text-xs w-full py-2">Play</button>
+                </div>
+                {% empty %}
+                <div class="skeleton h-24 rounded-md"></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- New Releases -->
+        <div class="card rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-text-secondary mb-4">New Releases</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for song in songs %}
+                {% if forloop.counter > 6 %}{% break %}{% endif %}
+                <div class="hover-card rounded-lg p-4 flex flex-col justify-between flex-1">
+                    <img src="{{ song.cover_url if song.cover_url else '/static/images/default-cover.png' }}" 
+                         alt="{{ song.title }}" 
+                         class="w-full h-32 object-cover rounded-md mb-3">
+                    <h3 class="text-capitalize text-sm font-medium line-clamp-1">{{ song.title }}</h3>
+                    <p class="text-text-secondary text-xs line-clamp-1">{{ song.artist.name if song.artist else 'Unknown Artist' }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="badge badge-secondary">{{ song.language or 'Unknown' }}</span>
+                        <span class="badge badge-primary">{{ song.genre or 'Unknown' }}</span>
+                    </div>
+                    <button class="mt-auto btn-primary text-xs w-full py-2">Play</button>
+                </div>
+                {% empty %}
+                <div class="skeleton h-24 rounded-md"></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Tamil Songs -->
+        <div class="card rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-text-secondary mb-4">Tamil Songs</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for song in songs[:4] %}
+                <div class="hover-card rounded-lg p-4 flex flex-col justify-between flex-1">
+                    <img src="{{ song.cover_url if song.cover_url else '/static/images/default-cover.png' }}" 
+                         alt="{{ song.title }}" 
+                         class="w-full h-32 object-cover rounded-md mb-3">
+                    <h3 class="text-capitalize text-sm font-medium line-clamp-1">{{ song.title }}</h3>
+                    <p class="text-text-secondary text-xs line-clamp-1">{{ song.artist.name if song.artist else 'Unknown Artist' }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="badge badge-secondary Tamil">{{ song.language or 'Tamil' }}</span>
+                    </div>
+                    <button class="mt-auto btn-primary text-xs w-full py-2">Play</button>
+                </div>
+                {% empty %}
+                <div class="skeleton h-24 rounded-md"></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Hindi Songs -->
+        <div class="card rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-text-secondary mb-4">Hindi Songs</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for song in songs[:4] %}
+                {% if forloop.counter > 8 %}{% break %}{% endif %}
+                <div class="hover-card rounded-lg p-4 flex flex-col justify-between flex-1">
+                    <img src="{{ song.cover_url if song.cover_url else '/static/images/default-cover.png' }}" 
+                         alt="{{ song.title }}" 
+                         class="w-full h-32 object-cover rounded-md mb-3">
+                    <h3 class="text-capitalize text-sm font-medium line-clamp-1">{{ song.title }}</h3>
+                    <p class="text-text-secondary text-xs line-clamp-1">{{ song.artist.name if song.artist else 'Unknown Artist' }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="badge badge-secondary Hindi">{{ song.language or 'Hindi' }}</span>
+                    </div>
+                    <button class="mt-auto btn-primary text-xs w-full py-2">Play</button>
+                </div>
+                {% empty %}
+                <div class="skeleton h-24 rounded-md"></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- English Songs -->
+        <div class="card rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-text-secondary mb-4">English Songs</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for song in songs[:4] %}
+                {% if forloop.counter > 12 %}{% break %}{% endif %}
+                <div class="hover-card rounded-lg p-4 flex flex-col justify-between flex-1">
+                    <img src="{{ song.cover_url if song.cover_url else '/static/images/default-cover.png' }}" 
+                         alt="{{ song.title }}" 
+                         class="w-full h-32 object-cover rounded-md mb-3">
+                    <h3 class="text-capitalize text-sm font-medium line-clamp-1">{{ song.title }}</h3>
+                    <p class="text-text-secondary text-xs line-clamp-1">{{ song.artist.name if song.artist else 'Unknown Artist' }}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                        <span class="badge badge-secondary English">{{ song.language or 'English' }}</span>
+                    </div>
+                    <button class="mt-auto btn-primary text-xs w-full py-2">Play</button>
+                </div>
+                {% empty %}
+                <div class="skeleton h-24 rounded-md"></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

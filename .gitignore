@@ -1,0 +1,12 @@
+.env
+*.db
+*.sqlite
+__pycache__/
+*.pyc
+instance/
+.pytest_cache/
+htmlcov/
+/freebeats/static/music/*
+/freebeats/uploads/*
+/freebeats/.gitignore
+render.yaml

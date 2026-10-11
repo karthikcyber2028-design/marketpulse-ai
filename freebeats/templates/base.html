@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FreeBeats{% endblock %}</title>
+    <meta name="description" content="FreeBeats - Music for every moment">
+    <link rel="icon" href="/static/images/favicon.ico">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-primary: #090B0D;
+            --bg-secondary: #121517;
+            --accent: #1ED760;
+            --text: #FFFFFF;
+            --text-secondary: #9AA1A6;
+            --card-bg: #1A1D21;
+            --border: #2A2D30;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .bg-primary { background: var(--bg-primary); }
+        .bg-secondary { background: var(--bg-secondary); }
+        .accent { color: var(--accent); }
+        .text-primary { color: var(--text); }
+        .text-secondary { color: var(--text-secondary); }
+        .border-primary { border-color: var(--border); }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: #0a0a0a;
+            padding: 10px 24px;
+            border-radius: 28px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-primary:hover {
+            background: #25d366;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 215, 96, 0.4);
+        }
+        .btn-primary:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .hover-card {
+            transition: all 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-primary) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s ease-in-out infinite;
+        }
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-primary { background: rgba(30, 215, 96, 0.2); color: var(--accent); }
+        .badge-secondary { background: rgba(154, 161, 166, 0.2); color: var(--text-secondary); }
+        
+        .player-bar {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0ms !important;
+                transition-duration: 0ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="border-b border-border/30 bg-secondary/80 backdrop-blur-md fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="{{ url_for('home') }}" class="text-2xl font-bold tracking-wider accent">
+                FreeBeats
+            </a>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="{{ url_for('home') }}" class="text-text-secondary hover-text transition">Home</a>
+                <a href="{{ url_for('search.search') }}" class="text-text-secondary hover-text transition">Search</a>
+                <a href="{{ url_for('users.profile') }}" class="text-text-secondary hover-text transition">Library</a>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                {% if current_user.is_authenticated %}
+                <div class="relative">
+                    <img src="{{ current_user.profile_image if current_user.profile_image != 'default.png' else '/static/images/default-avatar.png' }}" 
+                         alt="Profile" class="w-8 h-8 rounded-full object-cover border-2 border-border">
+                </div>
+                <a href="{{ url_for('users.profile') }}" class="text-text-secondary text-sm hover-text transition">
+                    {{ current_user.name or current_user.username }}
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="text-xs text-red-400 hover-text transition">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn-primary text-sm">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="text-text-secondary text-sm hover-text transition">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="pt-20 md:pt-32">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="max-w-7xl mx-auto px-6 py-3">
+              {% for message in messages %}
+                <div class="alert alert-info rounded-lg mb-4" role="alert">
+                  <p>{{ message }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Music Player -->
+    <div class="player-bar">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between border-t border-border/30">
+            <div class="flex items-center gap-3">
+                <img src="{{ current_song.cover_url if current_song else '/static/images/default-album.png' }}" 
+                     alt="{{ current_song.title if current_song else 'Now Playing' }}" 
+                     class="w-10 h-10 rounded-md object-cover">
+                <div>
+                    <p class="text-sm font-medium" title="{{ current_song.title if current_song else 'Now Playing' }}">{{ current_song.title if current_song else 'Now Playing' }}</p>
+                    <p class="text-xs text-text-secondary">{{ current_song.artist.name if current_song and current_song.artist else '' }}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 text-text-secondary text-xs">
+                <span id="current-time">0:00</span>
+                <input type="range" id="seek-bar" min="0" max="100" value="0" step="1" class="w-48 accent">
+                <span id="duration">3:45</span>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="prev-btn" class="w-8 h-8 rounded-full bg-border/50 flex items-center justify-center hover:bg-border transition">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button id="play-pause-btn" class="w-10 h-10 rounded-full bg-border/50 flex items-center justify-center hover:bg-border transition flex-shrink-0">
+                    <i class="fas fa-play" id="play-icon"></i>
+                    <i class="fas fa-pause hidden" id="pause-icon"></i>
+                </button>
+                <button id="next-btn" class="w-8 h-8 rounded-full bg-border/50 flex items-center justify-center hover:bg-border transition">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="border-t border-border/30 bg-secondary/90 py-6 text-center text-xs text-text-secondary">
+        <p>FreeBeats • Music for every moment • 2026</p>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/player.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
